@@ -16,8 +16,8 @@ WORKDIR_ROOT ?= $(error ERROR: Undefined variable WORKDIR_ROOT)
 WORKDIR_DEPS ?= $(error ERROR: Undefined variable WORKDIR_DEPS)
 
 override PKGSUBDIR = $(NAME)/$(SRCDIR_ROOT)
-override BINDIR_CONFIG_FILES := $(shell (cd $(SRCDIR_ROOT)/bin  && find . -type f) 2>/dev/null)
-override HOMEDIR_CONFIG_FILES := $(shell (cd $(SRCDIR_ROOT)/home  && find . -type f) 2>>/dev/null)
+override BINDIR_FILES := $(shell (cd $(SRCDIR_ROOT)/bin  && find . -type f) 2>/dev/null)
+override HOMEDIR_FILES := $(shell (cd $(SRCDIR_ROOT)/home  && find . -type f) 2>>/dev/null)
 
 # Error checking
 ifneq ($(DESTDIR), $(abspath $(DESTDIR)))
@@ -28,8 +28,8 @@ endif
 # Targets
 .PHONY: private_install
 private_install: \
-			$(foreach f, $(BINDIR_CONFIG_FILES), $(DESTDIR)/$(LIBDIR)/$(PKGSUBDIR)/bin/$(f) $(DESTDIR)/$(BINDIR)/$(f)) \
-			$(foreach f, $(HOMEDIR_CONFIG_FILES), $(DESTDIR)/$(LIBDIR)/$(PKGSUBDIR)/home/$(f) $(DESTDIR)/$(HOMEDIR)/$(f))
+			$(foreach f, $(BINDIR_FILES), $(DESTDIR)/$(LIBDIR)/$(PKGSUBDIR)/bin/$(f) $(DESTDIR)/$(BINDIR)/$(f)) \
+			$(foreach f, $(HOMEDIR_FILES), $(DESTDIR)/$(LIBDIR)/$(PKGSUBDIR)/home/$(f) $(DESTDIR)/$(HOMEDIR)/$(f))
 	@$(if $(wildcard $(DESTDIR)/$(LIBDIR)/$(PKGSUBDIR)/bin), diff -r $(DESTDIR)/$(LIBDIR)/$(PKGSUBDIR)/bin $(SRCDIR_ROOT)/bin)
 	@$(if $(wildcard $(DESTDIR)/$(LIBDIR)/$(PKGSUBDIR)/home), diff -r $(DESTDIR)/$(LIBDIR)/$(PKGSUBDIR)/home $(SRCDIR_ROOT)/home)
 	@echo "INFO: Installation complete"
@@ -48,12 +48,12 @@ $(DESTDIR)/$(HOMEDIR)/%: $(DESTDIR)/$(LIBDIR)/$(PKGSUBDIR)/home/%
 .PHONY: private_uninstall
 private_uninstall:
 	@echo "INFO: Uninstalling $(NAME)"
-	@$(foreach s, $(BINDIR_CONFIG_FILES), \
+	@$(foreach s, $(BINDIR_FILES), \
 		rm -v $(DESTDIR)/$(BINDIR)/$(s); \
 		test ! -e $(DESTDIR)/$(BINDIR)/$(s); \
 		rm -dv $(dir $(DESTDIR)/$(BINDIR)/$(s)) 2> /dev/null || true; \
 	)
-	@$(foreach s, $(HOMEDIR_CONFIG_FILES), \
+	@$(foreach s, $(HOMEDIR_FILES), \
 		rm -v $(DESTDIR)/$(HOMEDIR)/$(s); \
 		test ! -e $(DESTDIR)/$(HOMEDIR)/$(s); \
 		rm -dv $(dir $(DESTDIR)/$(HOMEDIR)/$(s)) 2> /dev/null || true; \
